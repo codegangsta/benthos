@@ -546,6 +546,29 @@ func (s *StreamBuilder) SetYAML(conf string) error {
 	return nil
 }
 
+func (s *StreamBuilder) SetConfig(conf any) error {
+	if s.producerChan != nil {
+		return errors.New("attempted to override inputs config after adding a func producer")
+	}
+	if s.consumerFunc != nil {
+		return errors.New("attempted to override outputs config after adding a func consumer")
+	}
+
+	spec := s.configSpec
+	pConf, err := spec.ParsedConfigFromAny(conf)
+	if err != nil {
+		return convertDocsLintErr(err)
+	}
+
+	sconf, err := config.FromParsed(s.env.internal, pConf, nil)
+	if err != nil {
+		return convertDocsLintErr(err)
+	}
+
+	s.setFromConfig(sconf)
+	return nil
+}
+
 // SetFields modifies the config by setting one or more fields identified by a
 // dot path to a value. The argument must be a variadic list of pairs, where the
 // first element is a string containing the target field dot path, and the
