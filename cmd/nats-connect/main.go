@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"log"
+	"os"
 
 	"github.com/redpanda-data/benthos/v4/public/service"
 
@@ -12,9 +15,32 @@ import (
 )
 
 func main() {
-	service.RunCLI(
-		context.Background(),
-		service.CLIOptSetBinaryName("nats-connect"),
-		service.CLIOptSetProductName("NATS Connect"),
-	)
+	builder := service.NewStreamBuilder()
+
+	data, err := os.ReadFile("example.json")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	config := make(map[string]any)
+
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = builder.SetConfig(config)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	stream, err := builder.Build()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = stream.Run(context.Background())
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

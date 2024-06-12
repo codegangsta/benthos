@@ -1,0 +1,7 @@
+{
+  "input": {
+    "generate": {
+      "mapping":  "foo = \"bar\""
+    }
+  }
+}
